@@ -10536,7 +10536,7 @@ ADE_VIRTVAR(HomingObject, l_Weapon, "object", "Object that weapon will home in o
 		}
 	}
 
-	if(wp->homing_object == NULL)
+	if(wp->homing_object == &obj_used_list)
 		return ade_set_args(L, "o", l_Object.Set(object_h()));
 	else
 		return ade_set_object_with_breed(L, OBJ_INDEX(wp->homing_object));
@@ -10603,7 +10603,7 @@ ADE_VIRTVAR(HomingSubsystem, l_Weapon, "subsystem", "Subsystem that weapon will 
 		}
 		else
 		{
-			wp->homing_object = NULL;
+			wp->homing_object = &obj_used_list;
 			wp->homing_pos = vmd_zero_vector;
 			wp->homing_subsys = NULL;
 		}
@@ -12435,19 +12435,19 @@ ade_lib l_CFile("CFile", NULL, "cf", "CFile FS2 filesystem access");
 
 int l_cf_get_path_id(char* n_path)
 {
-	uint i;
+	int i;
+	int path_len = strlen(n_path);
 
-	size_t path_len = strlen(n_path);
-	char *buf = (char*) vm_malloc((strlen(n_path)+1) * sizeof(char));
+	char *buf = (char*) vm_malloc((path_len+1) * sizeof(char));
 	
 	if (!buf) 
 		return CF_TYPE_INVALID;
 		
 	strcpy(buf, n_path);
 
-	//Remove trailing slashes
+	//Remove trailing slashes; avoid buffer overflow on 1-char strings
 	i = path_len -1;
-	while(buf[i] == '\\' || buf[i] == '/')
+	while(i >= 0 && (buf[i] == '\\' || buf[i] == '/'))
 		buf[i--] = '\0';
 
 	//Remove leading slashes
@@ -14868,6 +14868,19 @@ ADE_FUNC(getPrevMissionFilename, l_Campaign, NULL, "Gets previous mission filena
 		return ADE_RETURN_NIL;
 	}
 	return ade_set_args(L, "s", Campaign.missions[Campaign.prev_mission].name);
+}
+
+// DahBlount - This jumps to a mission, the reason it accepts a boolean value is so that players can return to campaign maps
+ADE_FUNC(jumpToMission, l_Campaign, "string filename, [boolean hub]", "Jumps to a mission based on the filename. Optionally, the player can be sent to a hub mission without setting missions to skipped.", "boolean", "Jumps to a mission, or returns nil.")
+{
+	char *filename = NULL;;
+	bool hub = false;
+	if (!ade_get_args(L, "s|b", &filename, &hub))
+		return ADE_RETURN_NIL;
+
+	mission_campaign_jump_to_mission(filename, hub);
+
+	return ADE_RETURN_TRUE;
 }
 
 // TODO: add a proper indexer type that returns a handle

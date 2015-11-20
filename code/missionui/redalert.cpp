@@ -323,9 +323,6 @@ void red_alert_init()
 
 	// set up red alert hotkeys
 	Buttons[gr_screen.res][RA_CONTINUE].button.set_hotkey(KEY_CTRLED | KEY_ENTER);
-
-	// load in background image and flashing red alert animation
-	Background_bitmap = bm_load(Red_alert_fname[gr_screen.res]);
 	
 	// hud_anim_init(&Flash_anim, Ra_flash_coords[gr_screen.res][RA_X_COORD], Ra_flash_coords[gr_screen.res][RA_Y_COORD], NOX("AlertFlash"));
 	// hud_anim_load(&Flash_anim);
@@ -335,6 +332,9 @@ void red_alert_init()
 	if ( !Briefing ) {
 		Briefing = &Briefings[0];			
 	}
+
+	// load in background image and flashing red alert animation
+	Background_bitmap = mission_ui_background_load(Briefing->background[gr_screen.res], Red_alert_fname[gr_screen.res]);
 
 	if ( Briefing->num_stages > 0 ) {
 		brief_color_text_init(Briefing->stages[0].text.c_str(), Ra_brief_text_wnd_coords[gr_screen.res][RA_W_COORD], default_redalert_briefing_color, 0);
@@ -1007,10 +1007,7 @@ void red_alert_bash_wingman_status()
 			wingp->red_alert_skipped_ships += wingp->wave_count;
 
 			if (wingp->num_waves == 0)
-			{
 				wingp->flags |= WF_WING_GONE;
-				wingp->flags |= WF_NEVER_EXISTED;
-			}
 
 			// look through all ships yet to arrive...
 			for (p_object *pobjp = GET_FIRST(&Ship_arrival_list); pobjp != END_OF_LIST(&Ship_arrival_list); pobjp = GET_NEXT(pobjp))

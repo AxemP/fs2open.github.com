@@ -280,6 +280,31 @@ void common_buttons_init(UI_WINDOW *ui_window)
 	}
 }
 
+// Try to load background bitmaps as appropriate
+int mission_ui_background_load(const char *custom_background, const char *single_background, const char *multi_background)
+{
+	int background_bitmap = -1;
+
+	if (custom_background && (*custom_background != '\0'))
+	{
+		background_bitmap = bm_load(custom_background);
+		if (background_bitmap < 0)
+			mprintf(("Failed to load custom background bitmap %s!\n", custom_background));
+	}
+
+	// if special background failed to load, or if no special background was supplied, load the standard bitmap
+	if (background_bitmap < 0)
+	{
+		if (multi_background && (Game_mode & GM_MULTIPLAYER))
+			background_bitmap = bm_load(multi_background);
+		else
+			background_bitmap = bm_load(single_background);
+	}
+
+	// return what we've got
+	return background_bitmap;
+}
+
 void set_active_ui(UI_WINDOW *ui_window)
 {
 	Active_ui_window = ui_window;
@@ -1502,7 +1527,7 @@ int restore_wss_data(ubyte *block)
 	return offset;
 }
 
-void draw_model_icon(int model_id, int flags, float closeup_zoom, int x, int y, int w, int h, ship_info *sip, int resize_mode)
+void draw_model_icon(int model_id, int flags, float closeup_zoom, int x, int y, int w, int h, const ship_info *sip, int resize_mode, const vec3d *closeup_pos)
 {
 	matrix	object_orient	= IDENTITY_MATRIX;
 	angles rot_angles = {0.0f,0.0f,0.0f};
@@ -1562,9 +1587,9 @@ void draw_model_icon(int model_id, int flags, float closeup_zoom, int x, int y, 
 			bs = &pm->submodel[0];
 		}
 
-		vec3d weap_closeup = Weapon_info->closeup_pos;
+		vec3d weap_closeup = *closeup_pos;
 		float y_closeup;
-		float tm_zoom = Weapon_info->closeup_zoom;
+		float tm_zoom = closeup_zoom;
 
 		//Find the center of teh submodel
 		weap_closeup.xyz.x = -(bs->min.xyz.z + (bs->max.xyz.z - bs->min.xyz.z)/2.0f);
