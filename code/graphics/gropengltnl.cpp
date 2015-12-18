@@ -1697,15 +1697,15 @@ void gr_opengl_set_view_matrix(const vec3d *pos, const matrix *orient)
 
 			// r.xyz  <--  r.x, u.x, f.x
 			GL_env_texture_matrix[0]  =  mview[0];
-			GL_env_texture_matrix[1]  = -mview[4];
+			GL_env_texture_matrix[1]  =  mview[4];
 			GL_env_texture_matrix[2]  =  mview[8];
 			// u.xyz  <--  r.y, u.y, f.y
 			GL_env_texture_matrix[4]  =  mview[1];
-			GL_env_texture_matrix[5]  = -mview[5];
+			GL_env_texture_matrix[5]  =  mview[5];
 			GL_env_texture_matrix[6]  =  mview[9];
 			// f.xyz  <--  r.z, u.z, f.z
 			GL_env_texture_matrix[8]  =  mview[2];
-			GL_env_texture_matrix[9]  = -mview[6];
+			GL_env_texture_matrix[9]  =  mview[6];
 			GL_env_texture_matrix[10] =  mview[10];
 
 			GL_env_texture_matrix[15] = 1.0f;
